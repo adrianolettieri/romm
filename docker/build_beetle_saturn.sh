@@ -12,6 +12,7 @@ readonly RETROARCH_EJS_DIR="${RETROARCH_DIR}/emulatorjs"
 readonly EJS_OUTPUT_DIR=/src/EmulatorJS/data/cores
 readonly OUTPUT_DIR=/output/cores
 readonly CORE_VERSION="${BEETLE_SATURN_COMMIT:?BEETLE_SATURN_COMMIT is required}"
+readonly BEETLE_SATURN_DEBUG="${BEETLE_SATURN_DEBUG:-0}"
 
 # The selected upstream revision uses std::tuple in the generated m68k
 # instruction bodies without including its standard-library header.
@@ -40,11 +41,17 @@ cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
 # The threaded runtime requires atomics-enabled RetroArch objects.  Build both
 # non-threaded variants first, then clean once before compiling the threaded
 # pair so their object files cannot be reused across incompatible flags.
-for build_args in "" "--legacy" "--threads --clean" "--threads --legacy"; do
+if [ "${BEETLE_SATURN_DEBUG}" = "1" ]; then
+  build_variants=("")
+else
+  build_variants=("" "--legacy" "--threads --clean" "--threads --legacy")
+fi
+
+for build_args in "${build_variants[@]}"; do
   # shellcheck disable=SC2086
   (
     cd "${RETROARCH_EJS_DIR}"
-    emmake ./build-emulatorjs.sh ${build_args}
+    DEBUG="${BEETLE_SATURN_DEBUG}" emmake ./build-emulatorjs.sh ${build_args}
   )
 done
 

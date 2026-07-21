@@ -141,6 +141,7 @@ FROM emscripten/emsdk:3.1.74 AS beetle-saturn-stage
 # duplicate inline symbols when the core is linked into the Emscripten host.
 ARG BEETLE_SATURN_COMMIT=77ec9a0681b17b432596c65ea3ca59b71ebe47b4
 ARG EMULATORJS_RETROARCH_COMMIT=86f72a39736b1fa351ca296d16f568e99e11a34f
+ARG BEETLE_SATURN_DEBUG=0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
@@ -161,7 +162,7 @@ RUN git init /src/RetroArch && \
 
 COPY ./docker/build_beetle_saturn.sh /usr/local/bin/build-beetle-saturn
 RUN chmod +x /usr/local/bin/build-beetle-saturn && \
-    /usr/local/bin/build-beetle-saturn
+    BEETLE_SATURN_DEBUG="${BEETLE_SATURN_DEBUG}" /usr/local/bin/build-beetle-saturn
 
 
 # BUILD NGINX MODULE WITH MOD_ZIP
