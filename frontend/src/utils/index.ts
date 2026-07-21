@@ -117,16 +117,19 @@ export function convertCronExperssion(expression: string) {
 export function getDownloadPath({
   rom,
   fileIDs = [],
+  fileName,
 }: {
   rom: SimpleRom;
   fileIDs?: number[];
+  /** Actual selected file name; required by EmulatorJS to infer the format. */
+  fileName?: string;
 }) {
   const queryParams = new URLSearchParams();
   if (fileIDs.length > 0) {
     queryParams.append("file_ids", fileIDs.join(","));
   }
   const queryString = queryParams.toString();
-  return `/api/roms/${rom.id}/content/${rom.fs_name}${
+  return `/api/roms/${rom.id}/content/${fileName ?? rom.fs_name}${
     queryString ? `?${queryString}` : ""
   }`;
 }

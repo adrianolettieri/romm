@@ -140,6 +140,9 @@ invalidateEmulatorJSRomCacheIfRenamed(romRef.value);
 window.EJS_gameUrl = getDownloadPath({
   rom: romRef.value,
   fileIDs: props.disc ? [props.disc] : [],
+  fileName: props.disc
+    ? romRef.value.files.find((file) => file.id === props.disc)?.file_name
+    : undefined,
 });
 window.EJS_biosUrl = props.bios
   ? `/api/firmware/${props.bios.id}/content/${props.bios.file_name}`
