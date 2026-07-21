@@ -42,6 +42,9 @@ cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
 # non-threaded variants first, then clean once before compiling the threaded
 # pair so their object files cannot be reused across incompatible flags.
 if [ "${BEETLE_SATURN_DEBUG}" = "1" ]; then
+  # Emscripten 3.1.74 cannot run Binaryen SAFE_HEAP together with the
+  # EmulatorJS Asyncify link step.  Keep ASSERTIONS and debug symbols.
+  sed -i 's/ -s SAFE_HEAP=2//' "${RETROARCH_DIR}/Makefile.emulatorjs"
   build_variants=("")
 else
   build_variants=("" "--legacy" "--threads --clean" "--threads --legacy")
