@@ -13,6 +13,11 @@ readonly EJS_OUTPUT_DIR=/src/EmulatorJS/data/cores
 readonly OUTPUT_DIR=/output/cores
 readonly CORE_VERSION="${BEETLE_SATURN_COMMIT:?BEETLE_SATURN_COMMIT is required}"
 
+# The selected upstream revision uses std::tuple in the generated m68k
+# instruction bodies without including its standard-library header.
+sed -i '/^#include "m68k.h"$/a #include <tuple>' \
+  "${CORE_SOURCE_DIR}/mednafen/hw_cpu/m68k/m68k_private.h"
+
 # Emscripten's sysroot does not expose a system zlib installation. Build the
 # vendored zlib instead of the Makefile's native-platform default.
 emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten SYSTEM_ZLIB=0
