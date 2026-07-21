@@ -12,7 +12,9 @@ readonly EJS_OUTPUT_DIR=/src/EmulatorJS/data/cores
 readonly OUTPUT_DIR=/output/cores
 readonly CORE_VERSION="${BEETLE_SATURN_COMMIT:?BEETLE_SATURN_COMMIT is required}"
 
-emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten
+# Emscripten's sysroot does not expose a system zlib installation. Build the
+# vendored zlib instead of the Makefile's native-platform default.
+emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten SYSTEM_ZLIB=0
 
 mkdir -p "${RETROARCH_DIR}/EmulatorJS" "${EJS_OUTPUT_DIR}"
 cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
