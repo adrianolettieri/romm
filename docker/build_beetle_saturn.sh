@@ -26,7 +26,10 @@ mkdir -p "${RETROARCH_EJS_DIR}" "${EJS_OUTPUT_DIR}"
 cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
   "${RETROARCH_EJS_DIR}/"
 
-for build_args in "" "--threads" "--legacy" "--threads --legacy"; do
+# The threaded runtime requires atomics-enabled RetroArch objects.  Build both
+# non-threaded variants first, then clean once before compiling the threaded
+# pair so their object files cannot be reused across incompatible flags.
+for build_args in "" "--legacy" "--threads --clean" "--threads --legacy"; do
   # shellcheck disable=SC2086
   (
     cd "${RETROARCH_EJS_DIR}"
