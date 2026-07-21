@@ -4,7 +4,7 @@ set -euo pipefail
 
 readonly LOG_FILE=/tmp/beetle-saturn-build.log
 exec > >(tee "${LOG_FILE}") 2>&1
-trap 'exit_status=$?; if [ "${exit_status}" -ne 0 ]; then echo "Beetle Saturn build failed; final log lines:"; tail -n 120 "${LOG_FILE}"; fi' EXIT
+trap 'exit_status=$?; if [ "${exit_status}" -ne 0 ]; then echo "Beetle Saturn linker diagnostics:"; grep -E "wasm-ld: error:|undefined symbol|duplicate symbol" "${LOG_FILE}" || true; echo "Beetle Saturn build failed; final log lines:"; tail -n 80 "${LOG_FILE}"; fi' EXIT
 
 readonly CORE_SOURCE_DIR=/src/beetle-saturn-libretro
 readonly RETROARCH_DIR=/src/RetroArch
