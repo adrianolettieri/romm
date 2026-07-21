@@ -18,6 +18,17 @@ readonly CORE_VERSION="${BEETLE_SATURN_COMMIT:?BEETLE_SATURN_COMMIT is required}
 sed -i '/^#include "m68k.h"$/a #include <tuple>' \
   "${CORE_SOURCE_DIR}/mednafen/hw_cpu/m68k/m68k_private.h"
 
+# The core carries an older libretro-common than EmulatorJS's RetroArch host.
+# Its void return type conflicts with RetroArch's size_t return type when both
+# copies are statically linked into one WebAssembly module.
+sed -i \
+  's/^void fill_pathname_basedir(char \*out_path, const char \*in_path, size_t size);$/size_t fill_pathname_basedir(char *out_path, const char *in_path, size_t size);/' \
+  "${CORE_SOURCE_DIR}/libretro-common/include/file/file_path.h"
+sed -i \
+  -e 's/^void fill_pathname_basedir(char \*out_dir,/size_t fill_pathname_basedir(char *out_dir,/' \
+  -e 's/^   path_basedir(out_dir);$/   return path_basedir(out_dir);/' \
+  "${CORE_SOURCE_DIR}/libretro-common/file/file_path.c"
+
 # Emscripten's sysroot does not expose a system zlib installation. Build the
 # vendored zlib instead of the Makefile's native-platform default.
 emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten SYSTEM_ZLIB=0
