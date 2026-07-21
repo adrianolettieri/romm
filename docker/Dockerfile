@@ -137,7 +137,9 @@ RUN wget "https://github.com/ruffle-rs/ruffle/releases/download/${RUFFLE_VERSION
 # add all four runtime variants (standard/threaded and WebGL2/legacy).
 FROM emscripten/emsdk:3.1.74 AS beetle-saturn-stage
 
-ARG BEETLE_SATURN_COMMIT=6f0cb9d1b9689601cd7dbf08e992d232304f50f7
+# Last revision before the May 2026 C++-to-C m68k refactor, which emits
+# duplicate inline symbols when the core is linked into the Emscripten host.
+ARG BEETLE_SATURN_COMMIT=77ec9a0681b17b432596c65ea3ca59b71ebe47b4
 ARG EMULATORJS_RETROARCH_COMMIT=86f72a39736b1fa351ca296d16f568e99e11a34f
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
