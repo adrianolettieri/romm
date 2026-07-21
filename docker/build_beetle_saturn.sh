@@ -32,7 +32,8 @@ sed -i \
 
 # Emscripten's sysroot does not expose a system zlib installation. Build the
 # vendored zlib instead of the Makefile's native-platform default.
-emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten SYSTEM_ZLIB=0
+emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten SYSTEM_ZLIB=0 \
+  DEBUG="${BEETLE_SATURN_DEBUG}"
 
 mkdir -p "${RETROARCH_EJS_DIR}" "${EJS_OUTPUT_DIR}"
 cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
