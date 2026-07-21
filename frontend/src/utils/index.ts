@@ -516,7 +516,7 @@ const _EJS_CORES_MAP: Record<string, string[]> = {
   "mega-pc": ["genesis_plus_gx"],
   "tera-drive": ["genesis_plus_gx"],
   "sega-nomad": ["genesis_plus_gx"],
-  saturn: ["yabause"],
+  saturn: ["mednafen_saturn", "yabause"],
   snes: ["snes9x"],
   sfam: ["snes9x"],
   "super-nintendo-original-european-version": ["snes9x"],

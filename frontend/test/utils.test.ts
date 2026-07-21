@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { languageToEmoji, regionToEmoji } from "@/utils";
+import {
+  getSupportedEJSCores,
+  languageToEmoji,
+  regionToEmoji,
+} from "@/utils";
 
 describe("regionToEmoji", () => {
   it("does not render Public Domain as the Poland flag", () => {
@@ -12,5 +16,14 @@ describe("languageToEmoji", () => {
   it("keeps the Polish language flag mapping", () => {
     expect(languageToEmoji("PL")).toBe("🇵🇱");
     expect(languageToEmoji("Polish")).toBe("🇵🇱");
+  });
+});
+
+describe("getSupportedEJSCores", () => {
+  it("prefers the Mednafen Saturn fallback while retaining Yabause", () => {
+    expect(getSupportedEJSCores("saturn")).toEqual([
+      "mednafen_saturn",
+      "yabause",
+    ]);
   });
 });

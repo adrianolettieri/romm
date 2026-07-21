@@ -120,6 +120,35 @@ RUN wget "https://github.com/EmulatorJS/EmulatorJS/releases/download/v${EMULATOR
     7z x -y "${EMULATORJS_VERSION}.7z" -o/emulatorjs && \
     rm -f "${EMULATORJS_VERSION}.7z"
 
+
+# BUILD THE BEETLE SATURN FALLBACK CORE FOR EMULATORJS
+# EmulatorJS 4.2.3 ships Yabause as its only Saturn core. Build the more
+# compatible Mednafen/Beetle core with the upstream EmulatorJS toolchain and
+# add all four runtime variants (standard/threaded and WebGL2/legacy).
+FROM emscripten/emsdk:3.1.74 AS beetle-saturn-stage
+
+ARG BEETLE_SATURN_COMMIT=6f0cb9d1b9689601cd7dbf08e992d232304f50f7
+ARG EMULATORJS_RETROARCH_COMMIT=86f72a39736b1fa351ca296d16f568e99e11a34f
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    p7zip-full && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN git init /src/beetle-saturn-libretro && \
+    git -C /src/beetle-saturn-libretro remote add origin https://github.com/libretro/beetle-saturn-libretro.git && \
+    git -C /src/beetle-saturn-libretro fetch --depth 1 origin "${BEETLE_SATURN_COMMIT}" && \
+    git -C /src/beetle-saturn-libretro checkout --detach FETCH_HEAD
+
+RUN git init /src/RetroArch && \
+    git -C /src/RetroArch remote add origin https://github.com/EmulatorJS/RetroArch.git && \
+    git -C /src/RetroArch fetch --depth 1 origin "${EMULATORJS_RETROARCH_COMMIT}" && \
+    git -C /src/RetroArch checkout --detach FETCH_HEAD
+
+COPY ./docker/build_beetle_saturn.sh /usr/local/bin/build-beetle-saturn
+RUN chmod +x /usr/local/bin/build-beetle-saturn && \
+    /usr/local/bin/build-beetle-saturn
+
 ARG RUFFLE_VERSION=nightly-2025-08-14
 ARG RUFFLE_FILE=ruffle-nightly-2025_08_14-web-selfhosted.zip
 ARG RUFFLE_SHA256=178870c5e7dd825a8df35920dfc5328d83e53f3c4d5d95f70b1ea9cd13494151
@@ -252,6 +281,7 @@ CMD ["/init"]
 FROM slim-image AS full-image
 ARG WEBSERVER_FOLDER=/var/www/html
 COPY --from=emulator-stage /emulatorjs ${WEBSERVER_FOLDER}/assets/emulatorjs
+COPY --from=beetle-saturn-stage /output/cores/ ${WEBSERVER_FOLDER}/assets/emulatorjs/data/cores/
 COPY --from=emulator-stage /ruffle ${WEBSERVER_FOLDER}/assets/ruffle
 
 
