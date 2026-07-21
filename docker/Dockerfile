@@ -121,6 +121,16 @@ RUN wget "https://github.com/EmulatorJS/EmulatorJS/releases/download/v${EMULATOR
     rm -f "${EMULATORJS_VERSION}.7z"
 
 
+ARG RUFFLE_VERSION=nightly-2025-08-14
+ARG RUFFLE_FILE=ruffle-nightly-2025_08_14-web-selfhosted.zip
+ARG RUFFLE_SHA256=178870c5e7dd825a8df35920dfc5328d83e53f3c4d5d95f70b1ea9cd13494151
+
+RUN wget "https://github.com/ruffle-rs/ruffle/releases/download/${RUFFLE_VERSION}/${RUFFLE_FILE}" && \
+    echo "${RUFFLE_SHA256}  ${RUFFLE_FILE}" | sha256sum -c - && \
+    unzip -o "${RUFFLE_FILE}" -d /ruffle && \
+    rm -f "${RUFFLE_FILE}"
+
+
 # BUILD THE BEETLE SATURN FALLBACK CORE FOR EMULATORJS
 # EmulatorJS 4.2.3 ships Yabause as its only Saturn core. Build the more
 # compatible Mednafen/Beetle core with the upstream EmulatorJS toolchain and
@@ -148,15 +158,6 @@ RUN git init /src/RetroArch && \
 COPY ./docker/build_beetle_saturn.sh /usr/local/bin/build-beetle-saturn
 RUN chmod +x /usr/local/bin/build-beetle-saturn && \
     /usr/local/bin/build-beetle-saturn
-
-ARG RUFFLE_VERSION=nightly-2025-08-14
-ARG RUFFLE_FILE=ruffle-nightly-2025_08_14-web-selfhosted.zip
-ARG RUFFLE_SHA256=178870c5e7dd825a8df35920dfc5328d83e53f3c4d5d95f70b1ea9cd13494151
-
-RUN wget "https://github.com/ruffle-rs/ruffle/releases/download/${RUFFLE_VERSION}/${RUFFLE_FILE}" && \
-    echo "${RUFFLE_SHA256}  ${RUFFLE_FILE}" | sha256sum -c - && \
-    unzip -o "${RUFFLE_FILE}" -d /ruffle && \
-    rm -f "${RUFFLE_FILE}"
 
 
 # BUILD NGINX MODULE WITH MOD_ZIP
