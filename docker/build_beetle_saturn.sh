@@ -8,6 +8,7 @@ trap 'exit_status=$?; if [ "${exit_status}" -ne 0 ]; then echo "Beetle Saturn bu
 
 readonly CORE_SOURCE_DIR=/src/beetle-saturn-libretro
 readonly RETROARCH_DIR=/src/RetroArch
+readonly RETROARCH_EJS_DIR="${RETROARCH_DIR}/emulatorjs"
 readonly EJS_OUTPUT_DIR=/src/EmulatorJS/data/cores
 readonly OUTPUT_DIR=/output/cores
 readonly CORE_VERSION="${BEETLE_SATURN_COMMIT:?BEETLE_SATURN_COMMIT is required}"
@@ -16,14 +17,14 @@ readonly CORE_VERSION="${BEETLE_SATURN_COMMIT:?BEETLE_SATURN_COMMIT is required}
 # vendored zlib instead of the Makefile's native-platform default.
 emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten SYSTEM_ZLIB=0
 
-mkdir -p "${RETROARCH_DIR}/EmulatorJS" "${EJS_OUTPUT_DIR}"
+mkdir -p "${RETROARCH_EJS_DIR}" "${EJS_OUTPUT_DIR}"
 cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
-  "${RETROARCH_DIR}/EmulatorJS/"
+  "${RETROARCH_EJS_DIR}/"
 
 for build_args in "" "--threads" "--legacy" "--threads --legacy"; do
   # shellcheck disable=SC2086
   (
-    cd "${RETROARCH_DIR}/EmulatorJS"
+    cd "${RETROARCH_EJS_DIR}"
     emmake ./build-emulatorjs.sh ${build_args}
   )
 done
