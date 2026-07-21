@@ -142,6 +142,7 @@ ARG EMULATORJS_RETROARCH_COMMIT=86f72a39736b1fa351ca296d16f568e99e11a34f
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    pkg-config \
     p7zip-full && \
     rm -rf /var/lib/apt/lists/*
 
