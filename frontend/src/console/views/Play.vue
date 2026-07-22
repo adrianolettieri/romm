@@ -480,12 +480,13 @@ async function boot() {
     const biosUrl = bios
       ? `/api/firmware/${bios.id}/content/${bios.file_name}`
       : "";
-    if (core === "mednafen_saturn" && biosUrl) {
-      // Load the regional BIOS alias before the game. The image patches
-      // EmulatorJS to convert this download to Uint8Array before FS.writeFile.
+    if (core === "mednafen_saturn") {
+      // Load CUE sidecars and the regional BIOS directly into MEMFS. The image
+      // patches EmulatorJS to convert each response before FS.writeFile.
       window.EJS_biosUrl = "";
       window.EJS_externalFiles = {
-        "/mpr-17933.bin": biosUrl,
+        ...romDownload.externalFiles,
+        ...(biosUrl ? { "/mpr-17933.bin": biosUrl } : {}),
       };
     } else {
       window.EJS_biosUrl = biosUrl;
@@ -493,7 +494,8 @@ async function boot() {
     }
   } catch {
     window.EJS_biosUrl = "";
-    window.EJS_externalFiles = {};
+    window.EJS_externalFiles =
+      core === "mednafen_saturn" ? romDownload.externalFiles : {};
   }
 
   window.EJS_player = "#game";

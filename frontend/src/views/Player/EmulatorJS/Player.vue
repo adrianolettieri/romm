@@ -156,13 +156,13 @@ const biosUrl = props.bios
   ? `/api/firmware/${props.bios.id}/content/${props.bios.file_name}`
   : "";
 
-if (window.EJS_core === "mednafen_saturn" && biosUrl) {
-  // Beetle Saturn looks up these region-specific filenames in the content
-  // directory. Load the European alias as an external file before the game;
-  // the Docker image patches EmulatorJS to write the binary Uint8Array.
+if (window.EJS_core === "mednafen_saturn") {
+  // Load CUE sidecars and the regional BIOS directly into MEMFS. The Docker
+  // image patches EmulatorJS to write each binary response as a Uint8Array.
   window.EJS_biosUrl = "";
   window.EJS_externalFiles = {
-    "/mpr-17933.bin": biosUrl,
+    ...romDownload.externalFiles,
+    ...(biosUrl ? { "/mpr-17933.bin": biosUrl } : {}),
   };
 } else {
   window.EJS_biosUrl = biosUrl;

@@ -13,32 +13,41 @@ export function getEJSRomDownloadSelection(
   selectedFileId: number | null,
   core: string,
 ) {
-  // A Saturn CUE normally references one or more sibling BIN tracks. Passing
-  // only the remembered "disc" file makes EmulatorJS download a lone BIN or
-  // CUE and synthesize an incomplete disc image. Let RomM package the complete
-  // file set so EmulatorJS can extract the original CUE and all of its tracks.
-  const selectedFile =
-    core === "mednafen_saturn" || selectedFileId === null
-      ? undefined
-      : files.find((file) => file.id === selectedFileId);
+  const selectedFile = files.find((file) => file.id === selectedFileId);
 
-  const preferredSaturnFile =
-    core === "mednafen_saturn"
-      ? ["m3u", "cue", "chd"]
-          .map((extension) =>
-            files.find((file) =>
-              file.file_name.toLowerCase().endsWith(`.${extension}`),
-            ),
-          )
-          .find(Boolean)
-      : undefined;
+  if (core === "mednafen_saturn") {
+    // Downloading every CUE/BIN member through the ROM content endpoint makes
+    // RomM generate a large ZIP, which EmulatorJS then expands entirely in
+    // browser memory. Load the small descriptor as the game and place its
+    // sibling tracks directly into MEMFS as external files instead.
+    const descriptor = ["m3u", "cue", "ccd", "toc", "chd"]
+      .map((extension) =>
+        files.find((file) =>
+          file.file_name.toLowerCase().endsWith(`.${extension}`),
+        ),
+      )
+      .find(Boolean);
+    const gameFile = descriptor ?? selectedFile ?? files[0];
+    const externalFiles: Record<string, string> = {};
+    if (gameFile && !gameFile.file_name.toLowerCase().endsWith(".chd")) {
+      for (const file of files) {
+        if (file.id === gameFile.id) continue;
+        externalFiles[`/${file.file_name}`] =
+          `/api/roms/${file.id}/files/content/${encodeURIComponent(file.file_name)}`;
+      }
+    }
+
+    return {
+      fileIDs: gameFile ? [gameFile.id] : [],
+      fileName: gameFile?.file_name,
+      externalFiles,
+    };
+  }
 
   return {
     fileIDs: selectedFile ? [selectedFile.id] : [],
-    fileName:
-      selectedFile?.file_name ??
-      preferredSaturnFile?.file_name ??
-      files[0]?.file_name,
+    fileName: selectedFile?.file_name ?? files[0]?.file_name,
+    externalFiles: {},
   };
 }
 
