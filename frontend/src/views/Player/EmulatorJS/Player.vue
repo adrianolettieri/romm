@@ -137,12 +137,15 @@ window.EJS_controlScheme = getControlSchemeForPlatform(
 window.EJS_threads = areThreadsRequiredForEJSCore(window.EJS_core);
 window.EJS_gameID = romRef.value.id;
 invalidateEmulatorJSRomCacheIfRenamed(romRef.value);
+const selectedFileName = props.disc
+  ? romRef.value.files.find((file) => file.id === props.disc)?.file_name
+  : romRef.value.files[0]?.file_name;
 window.EJS_gameUrl = getDownloadPath({
   rom: romRef.value,
   fileIDs: props.disc ? [props.disc] : [],
-  fileName: props.disc
-    ? romRef.value.files.find((file) => file.id === props.disc)?.file_name
-    : undefined,
+  // EmulatorJS derives the format from this URL's filename. rom.fs_name has
+  // no extension, so always pass the actual ROM file name.
+  fileName: selectedFileName,
 });
 const biosUrl = props.bios
   ? `/api/firmware/${props.bios.id}/content/${props.bios.file_name}`

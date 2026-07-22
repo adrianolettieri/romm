@@ -447,9 +447,11 @@ async function boot() {
   window.EJS_gameUrl = getDownloadPath({
     rom: rom,
     fileIDs: validDiscId ? [validDiscId] : [],
+    // EmulatorJS requires the original suffix (for example .chd) to select
+    // the content loader; rom.fs_name is extensionless.
     fileName: validDiscId
       ? rom.files.find((file) => file.id === validDiscId)?.file_name
-      : undefined,
+      : rom.files[0]?.file_name,
   });
 
   // BIOS selection persistence
