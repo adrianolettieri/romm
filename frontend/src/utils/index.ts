@@ -594,7 +594,9 @@ export function getSupportedEJSCores(
  * @returns True if threads are required, false otherwise.
  */
 export function areThreadsRequiredForEJSCore(core: string): boolean {
-  return ["dosbox_pure", "ppsspp", "azahar"].includes(core);
+  return ["dosbox_pure", "ppsspp", "azahar", "mednafen_saturn"].includes(
+    core,
+  );
 }
 
 const canvas = document.createElement("canvas");

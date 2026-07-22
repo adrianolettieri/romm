@@ -31,7 +31,7 @@ import {
   loadEmulatorJSSave,
   loadEmulatorJSState,
   invalidateEmulatorJSRomCacheIfRenamed,
-  resetEJSWebGL2Preference,
+  resetEJSSaturnRuntimePreferences,
   getEJSRomDownloadSelection,
   createQuickLoadButton,
   createSaveQuitButton,
@@ -139,7 +139,7 @@ window.EJS_controlScheme = getControlSchemeForPlatform(
 window.EJS_threads = areThreadsRequiredForEJSCore(window.EJS_core);
 window.EJS_gameID = romRef.value.id;
 invalidateEmulatorJSRomCacheIfRenamed(romRef.value);
-resetEJSWebGL2Preference(romRef.value.id, window.EJS_core);
+resetEJSSaturnRuntimePreferences(romRef.value.id, window.EJS_core);
 const romDownload = getEJSRomDownloadSelection(
   romRef.value.files,
   props.disc,
@@ -185,7 +185,7 @@ window.EJS_defaultOptions = {
   rewindEnabled: "enabled",
   ...coreOptions,
   ...(window.EJS_core === "mednafen_saturn"
-    ? { webgl2Enabled: "enabled" }
+    ? { webgl2Enabled: "enabled", ejs_threads: "enabled" }
     : {}),
 };
 const ejsControls = configStore.getEJSControls(props.core);

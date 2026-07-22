@@ -215,11 +215,14 @@ export function invalidateEmulatorJSRomCacheIfRenamed(rom: {
 }
 
 /**
- * Beetle Saturn's legacy WebGL build is incompatible with modern Chrome's
- * stock GLSL shader. Prefer WebGL 2 and remove only an obsolete per-game
- * opt-out left by a previous EmulatorJS session.
+ * Beetle Saturn needs the WebGL 2 and threaded builds. Remove only obsolete
+ * per-game opt-outs left by an earlier EmulatorJS session so they cannot
+ * override RomM's required runtime variant.
  */
-export function resetEJSWebGL2Preference(romId: number, core: string) {
+export function resetEJSSaturnRuntimePreferences(
+  romId: number,
+  core: string,
+) {
   if (core !== "mednafen_saturn") return;
 
   const keyPrefix = `ejs-${romId}-`;
@@ -228,8 +231,19 @@ export function resetEJSWebGL2Preference(romId: number, core: string) {
 
     try {
       const value = JSON.parse(localStorage.getItem(key) ?? "");
-      if (value?.settings?.webgl2Enabled !== "disabled") continue;
-      delete value.settings.webgl2Enabled;
+      const settings = value?.settings;
+      if (!settings) continue;
+
+      let changed = false;
+      if (settings.webgl2Enabled === "disabled") {
+        delete settings.webgl2Enabled;
+        changed = true;
+      }
+      if (settings.ejs_threads === "disabled") {
+        delete settings.ejs_threads;
+        changed = true;
+      }
+      if (!changed) continue;
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
       // EmulatorJS will ignore malformed settings itself; leave them intact.

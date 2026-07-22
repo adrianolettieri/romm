@@ -39,7 +39,7 @@ import { buildFormInput } from "@/utils/formData";
 import {
   getEJSRomDownloadSelection,
   invalidateEmulatorJSRomCacheIfRenamed,
-  resetEJSWebGL2Preference,
+  resetEJSSaturnRuntimePreferences,
 } from "@/views/Player/EmulatorJS/utils";
 
 const { t } = useI18n();
@@ -427,7 +427,7 @@ async function boot() {
   window.EJS_threads = areThreadsRequiredForEJSCore(core);
   window.EJS_gameID = rom.id;
   invalidateEmulatorJSRomCacheIfRenamed(rom);
-  resetEJSWebGL2Preference(rom.id, core);
+  resetEJSSaturnRuntimePreferences(rom.id, core);
 
   if (initialSaveId) {
     // Persist chosen save ID for later logic
@@ -529,7 +529,9 @@ async function boot() {
     "save-state-location": "browser",
     rewindEnabled: "enabled",
     ...coreOptions,
-    ...(core === "mednafen_saturn" ? { webgl2Enabled: "enabled" } : {}),
+    ...(core === "mednafen_saturn"
+      ? { webgl2Enabled: "enabled", ejs_threads: "enabled" }
+      : {}),
   };
   const ejsControls = configStore.getEJSControls(core);
   if (ejsControls) window.EJS_defaultControls = ejsControls;
