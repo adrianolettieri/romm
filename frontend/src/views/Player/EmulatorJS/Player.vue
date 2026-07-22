@@ -153,13 +153,10 @@ const biosUrl = props.bios
 
 if (window.EJS_core === "mednafen_saturn" && biosUrl) {
   // Beetle Saturn looks up these region-specific filenames in the content
-  // directory. EmulatorJS normally preserves RomM's original BIOS filename.
-  // Mount the selected file under both accepted Saturn aliases instead.
-  window.EJS_biosUrl = "";
-  window.EJS_externalFiles = {
-    "/mpr-17933.bin": biosUrl,
-    "/sega_101.bin": biosUrl,
-  };
+  // directory. For European games, download it through RomM's filename alias
+  // so EmulatorJS writes the selected bytes directly as mpr-17933.bin.
+  window.EJS_biosUrl = `/api/firmware/${props.bios!.id}/content/mpr-17933.bin`;
+  window.EJS_externalFiles = {};
 } else {
   window.EJS_biosUrl = biosUrl;
   window.EJS_externalFiles = {};

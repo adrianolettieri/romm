@@ -473,13 +473,10 @@ async function boot() {
       ? `/api/firmware/${bios.id}/content/${bios.file_name}`
       : "";
     if (core === "mednafen_saturn" && biosUrl) {
-      // Beetle Saturn requires region-specific BIOS filenames, while
-      // EmulatorJS otherwise keeps the filename used by RomM.
-      window.EJS_biosUrl = "";
-      window.EJS_externalFiles = {
-        "/mpr-17933.bin": biosUrl,
-        "/sega_101.bin": biosUrl,
-      };
+      // EmulatorJS writes BIOS files using the URL's final filename. Beetle
+      // Saturn requires mpr-17933.bin for European content.
+      window.EJS_biosUrl = `/api/firmware/${bios!.id}/content/mpr-17933.bin`;
+      window.EJS_externalFiles = {};
     } else {
       window.EJS_biosUrl = biosUrl;
       window.EJS_externalFiles = {};
