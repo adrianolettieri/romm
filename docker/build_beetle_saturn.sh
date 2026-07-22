@@ -32,8 +32,18 @@ sed -i \
 
 # Emscripten's sysroot does not expose a system zlib installation. Build the
 # vendored zlib instead of the Makefile's native-platform default.
+#
+# A full -O0/-g build of Beetle Saturn makes Asyncify's wasm-opt pass exceed
+# the memory available to typical Docker hosts.  The diagnostic build keeps
+# the core's C/C++ assertions but uses compact code without DWARF or LTO.
+if [ "${BEETLE_SATURN_DEBUG}" = "1" ]; then
+  sed -i 's/FLAGS += -O0 -g/FLAGS += -O1/' "${CORE_SOURCE_DIR}/Makefile"
+  core_lto=0
+else
+  core_lto=1
+fi
 emmake make -C "${CORE_SOURCE_DIR}" platform=emscripten SYSTEM_ZLIB=0 \
-  DEBUG="${BEETLE_SATURN_DEBUG}"
+  DEBUG="${BEETLE_SATURN_DEBUG}" LTO="${core_lto}"
 
 mkdir -p "${RETROARCH_EJS_DIR}" "${EJS_OUTPUT_DIR}"
 cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
@@ -44,8 +54,12 @@ cp "${CORE_SOURCE_DIR}/mednafen_saturn_libretro_emscripten.bc" \
 # pair so their object files cannot be reused across incompatible flags.
 if [ "${BEETLE_SATURN_DEBUG}" = "1" ]; then
   # Emscripten 3.1.74 cannot run Binaryen SAFE_HEAP together with the
-  # EmulatorJS Asyncify link step.  Keep ASSERTIONS and debug symbols.
-  sed -i 's/ -s SAFE_HEAP=2//' "${RETROARCH_DIR}/Makefile.emulatorjs"
+  # EmulatorJS Asyncify link step. Keep runtime assertions, but avoid source
+  # maps and -O0: both make wasm-opt require several GiB for this core.
+  sed -i \
+    -e 's/ -O0 -g -gsource-map -s SAFE_HEAP=2/ -O1/' \
+    -e 's/ CFLAGS += -O1 -g -gsource-map/ CFLAGS += -O1/' \
+    "${RETROARCH_DIR}/Makefile.emulatorjs"
   build_variants=("")
 else
   build_variants=("" "--legacy" "--threads --clean" "--threads --legacy")
