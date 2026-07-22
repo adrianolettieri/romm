@@ -32,7 +32,7 @@ import type { DetailedRom } from "@/stores/roms";
 import {
   getSupportedEJSCores,
   getControlSchemeForPlatform,
-  areThreadsRequiredForEJSCore,
+  shouldEnableEJSThreads,
   getDownloadPath,
 } from "@/utils";
 import { buildFormInput } from "@/utils/formData";
@@ -424,7 +424,7 @@ async function boot() {
   const coreOptions = configStore.getEJSCoreOptions(core);
   window.EJS_core = core;
   window.EJS_controlScheme = getControlSchemeForPlatform(rom.platform_slug);
-  window.EJS_threads = areThreadsRequiredForEJSCore(core);
+  window.EJS_threads = shouldEnableEJSThreads(core);
   window.EJS_gameID = rom.id;
   invalidateEmulatorJSRomCacheIfRenamed(rom);
   resetEJSSaturnRuntimePreferences(rom.id, core);
@@ -530,7 +530,10 @@ async function boot() {
     rewindEnabled: "enabled",
     ...coreOptions,
     ...(core === "mednafen_saturn"
-      ? { webgl2Enabled: "enabled", ejs_threads: "enabled" }
+      ? {
+          webgl2Enabled: "enabled",
+          ejs_threads: window.EJS_threads ? "enabled" : "disabled",
+        }
       : {}),
   };
   const ejsControls = configStore.getEJSControls(core);

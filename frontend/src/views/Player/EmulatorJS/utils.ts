@@ -239,7 +239,7 @@ export function resetEJSSaturnRuntimePreferences(
         delete settings.webgl2Enabled;
         changed = true;
       }
-      if (settings.ejs_threads === "disabled") {
+      if ("ejs_threads" in settings) {
         delete settings.ejs_threads;
         changed = true;
       }

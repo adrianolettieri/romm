@@ -594,8 +594,19 @@ export function getSupportedEJSCores(
  * @returns True if threads are required, false otherwise.
  */
 export function areThreadsRequiredForEJSCore(core: string): boolean {
-  return ["dosbox_pure", "ppsspp", "azahar", "mednafen_saturn"].includes(
-    core,
+  return ["dosbox_pure", "ppsspp", "azahar"].includes(core);
+}
+
+/**
+ * Prefer Beetle Saturn's threaded build when the page is cross-origin
+ * isolated, while retaining the non-threaded fallback for plain HTTP hosts.
+ */
+export function shouldEnableEJSThreads(core: string): boolean {
+  return (
+    areThreadsRequiredForEJSCore(core) ||
+    (core === "mednafen_saturn" &&
+      globalThis.crossOriginIsolated === true &&
+      typeof globalThis.SharedArrayBuffer === "function")
   );
 }
 
