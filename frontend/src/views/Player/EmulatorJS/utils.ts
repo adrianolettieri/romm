@@ -168,6 +168,29 @@ export function invalidateEmulatorJSRomCacheIfRenamed(rom: {
   localStorage.setItem(fsNameStorageKey, rom.fs_name);
 }
 
+/**
+ * Beetle Saturn's legacy WebGL build is incompatible with modern Chrome's
+ * stock GLSL shader. Prefer WebGL 2 and remove only an obsolete per-game
+ * opt-out left by a previous EmulatorJS session.
+ */
+export function resetEJSWebGL2Preference(romId: number, core: string) {
+  if (core !== "mednafen_saturn") return;
+
+  const keyPrefix = `ejs-${romId}-`;
+  for (const key of Object.keys(localStorage)) {
+    if (!key.startsWith(keyPrefix) || !key.endsWith("-settings")) continue;
+
+    try {
+      const value = JSON.parse(localStorage.getItem(key) ?? "");
+      if (value?.settings?.webgl2Enabled !== "disabled") continue;
+      delete value.settings.webgl2Enabled;
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // EmulatorJS will ignore malformed settings itself; leave them intact.
+    }
+  }
+}
+
 const IOS_FULLSCREEN_NAV_SELECTOR =
   ".v-app-bar, .v-bottom-navigation, .v-navigation-drawer";
 const IOS_FULLSCREEN_STYLE = `

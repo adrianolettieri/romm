@@ -16,7 +16,7 @@ readonly BEETLE_SATURN_DEBUG="${BEETLE_SATURN_DEBUG:-0}"
 # EmulatorJS uses this report value as the IndexedDB cache key. Keep a
 # separate revision because flags and integration patches can change the
 # generated archive without changing the pinned upstream core commit.
-readonly CORE_BUILD_VERSION="${CORE_VERSION}-ejs-3"
+readonly CORE_BUILD_VERSION="${CORE_VERSION}-ejs-4"
 
 # The selected upstream revision uses std::tuple in the generated m68k
 # instruction bodies without including its standard-library header.
@@ -99,5 +99,5 @@ done
 
 mkdir -p "${OUTPUT_DIR}/reports"
 cp "${EJS_OUTPUT_DIR}"/mednafen_saturn*-wasm.data "${OUTPUT_DIR}/"
-printf '{"core":"mednafen_saturn","buildStart":"%s","buildEnd":"%s","options":{}}\n' \
+printf '{"core":"mednafen_saturn","buildStart":"%s","buildEnd":"%s","options":{"defaultWebGL2":true}}\n' \
   "${CORE_BUILD_VERSION}" "${CORE_BUILD_VERSION}" >"${OUTPUT_DIR}/reports/mednafen_saturn.json"

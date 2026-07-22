@@ -31,6 +31,7 @@ import {
   loadEmulatorJSSave,
   loadEmulatorJSState,
   invalidateEmulatorJSRomCacheIfRenamed,
+  resetEJSWebGL2Preference,
   createQuickLoadButton,
   createSaveQuitButton,
   createExitEmulationButton,
@@ -137,6 +138,7 @@ window.EJS_controlScheme = getControlSchemeForPlatform(
 window.EJS_threads = areThreadsRequiredForEJSCore(window.EJS_core);
 window.EJS_gameID = romRef.value.id;
 invalidateEmulatorJSRomCacheIfRenamed(romRef.value);
+resetEJSWebGL2Preference(romRef.value.id, window.EJS_core);
 const selectedFileName = props.disc
   ? romRef.value.files.find((file) => file.id === props.disc)?.file_name
   : romRef.value.files[0]?.file_name;
@@ -177,6 +179,9 @@ window.EJS_defaultOptions = {
   "save-state-location": "browser",
   rewindEnabled: "enabled",
   ...coreOptions,
+  ...(window.EJS_core === "mednafen_saturn"
+    ? { webgl2Enabled: "enabled" }
+    : {}),
 };
 const ejsControls = configStore.getEJSControls(props.core);
 if (ejsControls) window.EJS_defaultControls = ejsControls;
