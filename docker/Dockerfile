@@ -288,6 +288,15 @@ FROM slim-image AS full-image
 ARG WEBSERVER_FOLDER=/var/www/html
 COPY --from=emulator-stage /emulatorjs ${WEBSERVER_FOLDER}/assets/emulatorjs
 COPY --from=beetle-saturn-stage /output/cores/ ${WEBSERVER_FOLDER}/assets/emulatorjs/data/cores/
+# EmulatorJS 4.2.3 passes ArrayBuffer values directly to Emscripten's FS for
+# EJS_externalFiles.  Emscripten expects a typed array, so BIOS sidecars fail
+# to be written. Patch both debug and minified loaders before shipping them.
+RUN sed -i \
+      's/this.writeFile(path, res.data);/this.writeFile(path, new Uint8Array(res.data));/' \
+      ${WEBSERVER_FOLDER}/assets/emulatorjs/data/src/GameManager.js && \
+    sed -i \
+      's/this.writeFile(n,i.data)/this.writeFile(n,new Uint8Array(i.data))/g' \
+      ${WEBSERVER_FOLDER}/assets/emulatorjs/data/emulator.min.js
 COPY --from=emulator-stage /ruffle ${WEBSERVER_FOLDER}/assets/ruffle
 
 
