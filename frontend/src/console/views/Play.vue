@@ -37,6 +37,7 @@ import {
 } from "@/utils";
 import { buildFormInput } from "@/utils/formData";
 import {
+  getEJSRomDownloadSelection,
   invalidateEmulatorJSRomCacheIfRenamed,
   resetEJSWebGL2Preference,
 } from "@/views/Player/EmulatorJS/utils";
@@ -448,14 +449,17 @@ async function boot() {
   if (storedDiscId && !validDiscId) {
     playerStorage.disc.value = null;
   }
+  const romDownload = getEJSRomDownloadSelection(
+    rom.files,
+    validDiscId,
+    core,
+  );
   window.EJS_gameUrl = getDownloadPath({
     rom: rom,
-    fileIDs: validDiscId ? [validDiscId] : [],
+    fileIDs: romDownload.fileIDs,
     // EmulatorJS requires the original suffix (for example .chd) to select
     // the content loader; rom.fs_name is extensionless.
-    fileName: validDiscId
-      ? rom.files.find((file) => file.id === validDiscId)?.file_name
-      : rom.files[0]?.file_name,
+    fileName: romDownload.fileName,
   });
 
   // BIOS selection persistence

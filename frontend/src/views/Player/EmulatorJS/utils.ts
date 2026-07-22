@@ -1,9 +1,46 @@
 import Bowser from "bowser";
-import { type SaveSchema } from "@/__generated__";
-import { type StateSchema } from "@/__generated__";
+import {
+  type RomFileSchema,
+  type SaveSchema,
+  type StateSchema,
+} from "@/__generated__";
 import saveApi from "@/services/api/save";
 import stateApi from "@/services/api/state";
 import { type DetailedRom } from "@/stores/roms";
+
+export function getEJSRomDownloadSelection(
+  files: RomFileSchema[],
+  selectedFileId: number | null,
+  core: string,
+) {
+  // A Saturn CUE normally references one or more sibling BIN tracks. Passing
+  // only the remembered "disc" file makes EmulatorJS download a lone BIN or
+  // CUE and synthesize an incomplete disc image. Let RomM package the complete
+  // file set so EmulatorJS can extract the original CUE and all of its tracks.
+  const selectedFile =
+    core === "mednafen_saturn" || selectedFileId === null
+      ? undefined
+      : files.find((file) => file.id === selectedFileId);
+
+  const preferredSaturnFile =
+    core === "mednafen_saturn"
+      ? ["m3u", "cue", "chd"]
+          .map((extension) =>
+            files.find((file) =>
+              file.file_name.toLowerCase().endsWith(`.${extension}`),
+            ),
+          )
+          .find(Boolean)
+      : undefined;
+
+  return {
+    fileIDs: selectedFile ? [selectedFile.id] : [],
+    fileName:
+      selectedFile?.file_name ??
+      preferredSaturnFile?.file_name ??
+      files[0]?.file_name,
+  };
+}
 
 function buildStateName(rom: DetailedRom): string {
   const romName = rom.fs_name_no_ext.trim();

@@ -32,6 +32,7 @@ import {
   loadEmulatorJSState,
   invalidateEmulatorJSRomCacheIfRenamed,
   resetEJSWebGL2Preference,
+  getEJSRomDownloadSelection,
   createQuickLoadButton,
   createSaveQuitButton,
   createExitEmulationButton,
@@ -139,15 +140,17 @@ window.EJS_threads = areThreadsRequiredForEJSCore(window.EJS_core);
 window.EJS_gameID = romRef.value.id;
 invalidateEmulatorJSRomCacheIfRenamed(romRef.value);
 resetEJSWebGL2Preference(romRef.value.id, window.EJS_core);
-const selectedFileName = props.disc
-  ? romRef.value.files.find((file) => file.id === props.disc)?.file_name
-  : romRef.value.files[0]?.file_name;
+const romDownload = getEJSRomDownloadSelection(
+  romRef.value.files,
+  props.disc,
+  window.EJS_core,
+);
 window.EJS_gameUrl = getDownloadPath({
   rom: romRef.value,
-  fileIDs: props.disc ? [props.disc] : [],
+  fileIDs: romDownload.fileIDs,
   // EmulatorJS derives the format from this URL's filename. rom.fs_name has
   // no extension, so always pass the actual ROM file name.
-  fileName: selectedFileName,
+  fileName: romDownload.fileName,
 });
 const biosUrl = props.bios
   ? `/api/firmware/${props.bios.id}/content/${props.bios.file_name}`
