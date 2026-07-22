@@ -467,11 +467,24 @@ async function boot() {
       : undefined;
 
     const bios = biosFromStorage ?? biosFromConfig ?? null;
-    window.EJS_biosUrl = bios
+    const biosUrl = bios
       ? `/api/firmware/${bios.id}/content/${bios.file_name}`
       : "";
+    if (core === "mednafen_saturn" && biosUrl) {
+      // Beetle Saturn requires region-specific BIOS filenames, while
+      // EmulatorJS otherwise keeps the filename used by RomM.
+      window.EJS_biosUrl = "";
+      window.EJS_externalFiles = {
+        "/mpr-17933.bin": biosUrl,
+        "/sega_101.bin": biosUrl,
+      };
+    } else {
+      window.EJS_biosUrl = biosUrl;
+      window.EJS_externalFiles = {};
+    }
   } catch {
     window.EJS_biosUrl = "";
+    window.EJS_externalFiles = {};
   }
 
   window.EJS_player = "#game";

@@ -144,9 +144,23 @@ window.EJS_gameUrl = getDownloadPath({
     ? romRef.value.files.find((file) => file.id === props.disc)?.file_name
     : undefined,
 });
-window.EJS_biosUrl = props.bios
+const biosUrl = props.bios
   ? `/api/firmware/${props.bios.id}/content/${props.bios.file_name}`
   : "";
+
+if (window.EJS_core === "mednafen_saturn" && biosUrl) {
+  // Beetle Saturn looks up these region-specific filenames in the content
+  // directory. EmulatorJS normally preserves RomM's original BIOS filename.
+  // Mount the selected file under both accepted Saturn aliases instead.
+  window.EJS_biosUrl = "";
+  window.EJS_externalFiles = {
+    "/mpr-17933.bin": biosUrl,
+    "/sega_101.bin": biosUrl,
+  };
+} else {
+  window.EJS_biosUrl = biosUrl;
+  window.EJS_externalFiles = {};
+}
 window.EJS_player = "#game";
 window.EJS_color = "#A453FF";
 window.EJS_alignStartButton = "center";
