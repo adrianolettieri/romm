@@ -186,6 +186,17 @@ export function useGameActions(
     else if (canPlayRuffle.value) path = `/rom/${rom.id}/ruffle`;
     if (!path) return;
     const target = path;
+    const requiresIsolatedDocument = canPlayEJS.value;
+    const navigateToPlayer = async () => {
+      await router.push(target);
+      if (requiresIsolatedDocument) {
+        // COOP/COEP are response headers on the player document. A client-side
+        // route change retains the previous document and leaves
+        // crossOriginIsolated false, so EmulatorJS selects the non-threaded
+        // core even though the player URL is configured correctly in nginx.
+        router.go(0);
+      }
+    };
     // When the caller supplies a cover element (the gallery card / detail
     // hero), morph it into the player's hero cover — same `rom-cover-<id>`
     // tag the player paints statically. Degrades to a plain push where view
@@ -195,11 +206,12 @@ export function useGameActions(
       // Await the push inside the transition so the browser snapshots the
       // player view *after* it has rendered its hero cover (which carries the
       // same `rom-cover-<id>` tag) — otherwise there's no element to morph to.
-      morphTransition({ el, name: `rom-cover-${rom.id}` }, async () => {
-        await router.push(target);
-      });
+      morphTransition(
+        { el, name: `rom-cover-${rom.id}` },
+        navigateToPlayer,
+      );
     } else {
-      router.push(target);
+      void navigateToPlayer();
     }
   }
 
